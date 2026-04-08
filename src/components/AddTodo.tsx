@@ -1,13 +1,13 @@
-import { useRef } from "react"
+import { useRef } from "react";
 
-export default function AddTodo({ onAdd }: any) {
-  const inputRef: any = useRef()
+export default function AddTodo({ onAdd }: { onAdd: (text: string) => void }) {
+  const inputRef: React.RefObject<HTMLInputElement> = useRef();
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault()
-    onAdd(inputRef.current.value)
-    inputRef.current.value = ""
-  }
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onAdd(inputRef.current.value);
+    inputRef.current.value = "";
+  };
 
   return (
     <form
@@ -22,6 +22,5 @@ export default function AddTodo({ onAdd }: any) {
       />
       <button type="submit">Add</button>
     </form>
-  )
+  );
 }
-

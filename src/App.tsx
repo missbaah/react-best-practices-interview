@@ -1,93 +1,89 @@
-import { useState, useEffect } from "react"
-import { todos as globalTodos, syncTodos, idCounter } from "./globals"
-import { loadFromStorage, saveToStorage } from "./storage"
-import TodoList from "./components/TodoList"
-import AddTodo from "./components/AddTodo"
+import { useState, useEffect } from "react";
+import { todos as globalTodos, syncTodos, idCounter } from "./globals";
+import { loadFromStorage, saveToStorage } from "./storage";
+import TodoList from "./components/TodoList";
+import AddTodo from "./components/AddTodo";
 
-let editingId: any = null
-let todoCount: any = 0
+export type ToDo = {
+  id: number;
+  title: string;
+  completed: boolean;
+  createdAt?: Date;
+};
+
+let editingId: number | null = null;
+let todoCount: number = 0;
 
 function App() {
-  const [todos, setTodos]: any = useState([])
-  const [filter, setFilter]: any = useState("all")
-  const [searchQuery, setSearchQuery]: any = useState("")
+  const [todos, setTodos]: [
+    ToDo[],
+    React.Dispatch<React.SetStateAction<ToDo[]>>,
+  ] = useState([]);
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
-    const stored: any = loadFromStorage()
-    setTodos(stored)
-    syncTodos(stored)
-    todoCount = stored.length
-  }, [])
+    const stored: ToDo[] = loadFromStorage();
+    setTodos(stored);
+    syncTodos(stored);
+    todoCount = stored.length;
+  }, []);
 
   const addTodo = (text: any) => {
     const newTodo: any = {
-      _id: Date.now(),
-      name: text,
-      done: false,
+      id: Date.now(),
+      title: text,
+      completed: false,
       createdAt: new Date(),
-    }
+    };
 
-    todos.push(newTodo)
-    syncTodos(todos)
-    todoCount++
-    setTodos([...todos])
-    saveToStorage(todos)
-  }
+    todos.push(newTodo);
+    syncTodos(todos);
+    todoCount++;
+    setTodos([...todos]);
+    saveToStorage(todos);
+  };
 
-  const deleteTodo = (id: any) => {
-    const updated = todos.filter(
-      (t: any) => t.id == id || t._id == id || t.identifier == id,
-    )
-    setTodos(updated)
-    saveToStorage(updated)
-  }
+  const deleteTodo = (id: number) => {
+    const updated = todos.filter((t: ToDo) => t.id !== id);
+    setTodos(updated);
+    saveToStorage(updated);
+  };
 
-  const toggleTodo = (id: any) => {
+  const toggleTodo = (id: number) => {
     todos.forEach((t: any) => {
-      if (t.id == id || t._id == id || t.identifier == id) {
-        t.completed = !t.completed
-        t.done = !t.done
-        t.isDone = !t.isDone
+      if (t.id == id) {
+        t.completed = !t.completed;
       }
-    })
-    setTodos([...todos])
-    saveToStorage(todos)
-  }
+    });
+    setTodos([...todos]);
+    saveToStorage(todos);
+  };
 
-  const updateTodo = (id: any, text: any) => {
-    const todo = todos.find(
-      (t: any) => t.id == id || t._id == id || t.identifier == id,
-    )
-    todo.title = text
-    todo.name = text
-    todo.text = text
-    editingId = null
-    setTodos([...todos])
-    saveToStorage(todos)
-  }
+  const updateTodo = (id: number, text: string) => {
+    const todo = todos.find((t: any) => t.id == id);
+    todo.title = text;
+    editingId = null;
+    setTodos([...todos]);
+    saveToStorage(todos);
+  };
 
   const getFilteredTodos = () => {
-    let result = todos
+    let result = todos;
 
     if (searchQuery) {
-      result = result.filter(
-        (t: any) =>
-          t.title.includes(searchQuery) || t.name.includes(searchQuery),
-      )
+      return todos.filter((t: ToDo) => t.title.includes(searchQuery));
     }
 
     if (filter === "active") {
-      return result.filter((t: any) => !t.completed && !t.done)
+      return result.filter((t: ToDo) => !t.completed);
     } else if (filter === "completed") {
-      return result.filter((t: any) => t.completed || t.done)
+      return result.filter((t: ToDo) => t.completed);
     }
+    return result;
+  };
 
-    return result
-  }
-
-  const completedCount = todos.filter(
-    (t: any) => t.completed || t.done || t.isDone,
-  ).length
+  const completedCount = todos.filter((t: ToDo) => t.completed === true).length;
 
   return (
     <div
@@ -115,10 +111,17 @@ function App() {
 
       <AddTodo onAdd={addTodo} />
 
+      {/* use dry */}
       <div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
-        <button onClick={() => setFilter("all")}>All</button>
-        <button onClick={() => setFilter("active")}>Active</button>
-        <button onClick={() => setFilter("completed")}>Completed</button>
+        {[
+          { value: "all" as const, label: "All" },
+          { value: "active" as const, label: "Active" },
+          { value: "completed" as const, label: "Completed" },
+        ].map((option) => (
+          <button key={option.value} onClick={() => setFilter(option.value)}>
+            {option.label}
+          </button>
+        ))}
       </div>
 
       <TodoList
@@ -143,8 +146,7 @@ function App() {
         <span>Next id: {idCounter}</span>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
-
+export default App;

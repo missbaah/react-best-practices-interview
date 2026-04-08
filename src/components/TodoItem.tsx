@@ -1,20 +1,18 @@
-import { useState } from "react"
+import { useState } from "react";
 
 export default function TodoItem({ todo, onDelete, onToggle, onUpdate }: any) {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [editText, setEditText]: any = useState(
-    todo.title || todo.name || todo.text,
-  )
+  const [editText, setEditText]: any = useState(todo.title);
 
-  const isCompleted = todo.completed || todo.done || todo.isDone
+  const isCompleted = todo.completed;
 
-  const displayText = todo.title || todo.name || todo.text
+  const displayText = todo.title;
 
   const handleSave = () => {
-    onUpdate(todo.id || todo._id || todo.identifier, editText)
-    setIsEditing(false)
-  }
+    onUpdate(todo.id, editText);
+    setIsEditing(false);
+  };
 
   return (
     <li
@@ -32,7 +30,7 @@ export default function TodoItem({ todo, onDelete, onToggle, onUpdate }: any) {
       <input
         type="checkbox"
         checked={!!isCompleted}
-        onChange={() => onToggle(todo.id || todo._id || todo.identifier)}
+        onChange={() => onToggle(todo.id)}
       />
 
       {isEditing ? (
@@ -49,14 +47,9 @@ export default function TodoItem({ todo, onDelete, onToggle, onUpdate }: any) {
         <>
           <span style={{ flex: 1 }}>{displayText}</span>
           <button onClick={() => setIsEditing(true)}>Edit</button>
-          <button
-            onClick={() => onDelete(todo.id || todo._id || todo.identifier)}
-          >
-            Delete
-          </button>
+          <button onClick={() => onDelete(todo.id)}>Delete</button>
         </>
       )}
     </li>
-  )
+  );
 }
-
